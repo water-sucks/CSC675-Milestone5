@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -24,10 +25,14 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "citizens",
+			Description: "List all citizens in this voting system",
+		},
 	}
 
-	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"hello": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App){
+		"hello": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
 			options := i.ApplicationCommandData().Options
 
 			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
@@ -45,6 +50,26 @@ var (
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("Hello %v!", name),
+				},
+			})
+		},
+		"citizens": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			citizens, err := a.AllCitizens()
+			if err != nil {
+				log.Printf(err.Error())
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Unable to retreive citizens list. Try again later.",
+					},
+				})
+				return
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprint(citizens),
 				},
 			})
 		},
