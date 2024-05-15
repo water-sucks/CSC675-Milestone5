@@ -179,3 +179,27 @@ func (a *App) ElectionTurnout(electionID int, t ElectionType) (*ElectionTurnoutR
 		return &result, nil
 	}
 }
+
+func (a *App) CitizenCandidateVotes(citizenID int) ([]CitizenVoteResult, error) {
+	var votes []CitizenVoteResult
+
+	rows, err := a.db.Query("CALL CitizenCandidateVotes(?)", citizenID)
+	if err != nil {
+		return nil, fmt.Errorf("CitizenCandidateVotes: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var vote CitizenVoteResult
+		if err := rows.Scan(&vote.ElectionName, &vote.CandidateName, &vote.CastTime); err != nil {
+			return nil, fmt.Errorf("CitizenCandidateVotes: %v", err)
+		}
+		votes = append(votes, vote)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("CitizenCandidateVotes: %v", err)
+	}
+
+	return votes, nil
+}

@@ -74,6 +74,18 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "citizen-votes",
+			Description: "Find all votes for candidates that a citizen has cast",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "citizen-id",
+					Description: "ID of citizen to find votes for",
+					Required:    true,
+				},
+			},
+		},
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App){
@@ -235,8 +247,8 @@ var (
 				Data: &discordgo.InteractionResponseData{
 					Embeds: []*discordgo.MessageEmbed{
 						{
-							Title:       "Candidate Election History",
-							Description: "Number of Elections Candidates Participated In",
+							Title:       "Available Elections",
+							Description: "What elections are available, and what elections have passed",
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:   "Name",
@@ -363,6 +375,63 @@ var (
 				sendMessage(s, i.Interaction, fmt.Sprintf("The turnout for this initiative '%v' was %v%% of registered voters.", turnout.Name, turnout.Turnout))
 
 			}
+		},
+
+		"citizen-votes": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			options := i.ApplicationCommandData().Options
+
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+			for _, opt := range options {
+				optionMap[opt.Name] = opt
+			}
+
+			citizenID := int(optionMap["citizen-id"].IntValue())
+
+			candidates, err := a.CitizenCandidateVotes(citizenID)
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "Unable to retreive candidates list. Try again later.")
+				return
+			}
+
+			electionName := ""
+			candidateNames := ""
+			castTime := ""
+
+			for _, v := range candidates {
+				electionName += fmt.Sprintf("%v\n", v.ElectionName)
+				candidateNames += fmt.Sprintf("%s\n", v.CandidateName)
+				castTime += fmt.Sprintf("%v\n", v.CastTime.Format("January 2, 2006"))
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Candidate Voting History",
+							Description: "What candidates has this user voted for?",
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "Election",
+									Value:  electionName,
+									Inline: true,
+								},
+								{
+									Name:   "Candidate",
+									Value:  candidateNames,
+									Inline: true,
+								},
+								{
+									Name:   "Cast @",
+									Value:  castTime,
+									Inline: true,
+								},
+							},
+						},
+					},
+				},
+			})
 		},
 	}
 )

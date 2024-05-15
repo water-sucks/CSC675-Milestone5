@@ -17,7 +17,7 @@ author: Varun Narravula
     -   `election_type` :: `popular` | `electoral` | `referendum` | `initiative`
     -   `election_id` :: `number`
 -   [ ] `/remove-suspicious-votes` :: remove all suspicious votes at once (5, 6)
--   [ ] `/citizen-votes` :: find all votes that citizen has cast (7)
+-   [x] `/citizen-votes` :: find all votes that citizen has cast (7)
 -   [x] `/patriots` :: list all citizens with more than 3 votes (8)
 -   [ ] `/remove-citizen` :: remove votes for citizen (9)
     -   `citizen_id` :: `number`

@@ -53,3 +53,9 @@ type ElectionTurnoutResult struct {
 	Name    string
 	Turnout float64
 }
+
+type CitizenVoteResult struct {
+	ElectionName  string
+	CandidateName string
+	CastTime      time.Time
+}

@@ -22,9 +22,8 @@ author: Varun Narravula
    will be recorded in the election audit log.
 6. Votes marked as suspicious for all election types can be removed at any time,
    and will not count towards victory for prior commands.
-7. Find all votes from a citizen for any given election type within a given time
-   frame; display votes marked as suspicious with an indicator that it is marked
-   as suspicious.
+7. Find all votes from a citizen for popular and electoral elections, sorted by
+   time of vote.
 8. Show a list of "patriot" citizens that have voted more than 3 times.
 9. If a voter is deleted, then all votes for that user will be unlinked to them,
    but will still remain in the DB for archival purposes.
