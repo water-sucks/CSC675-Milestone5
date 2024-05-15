@@ -633,6 +633,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Placeholder table for view `view1`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `view1` (`id` INT);
+
+-- -----------------------------------------------------
 -- procedure Patriots
 -- -----------------------------------------------------
 DROP procedure IF EXISTS `Patriots`;
@@ -748,6 +753,54 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure CandidateHistory
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `CandidateHistory`;
+
+DELIMITER $$
+CREATE PROCEDURE `CandidateHistory` ()
+BEGIN
+	SELECT
+		candidate_id AS id,
+		(SELECT name FROM candidates WHERE candidate_id = id) AS name,
+		SUM(election_count) AS election_count
+	FROM (
+		SELECT candidate_id, COUNT(*) AS election_count FROM popular_election_candidates GROUP BY candidate_id
+		UNION ALL
+		SELECT candidate_id, COUNT(*) AS election_count FROM electoral_election_candidates GROUP BY candidate_id
+	) candidate_counts
+	GROUP BY candidate_id;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure FindElections
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `FindElections`;
+
+DELIMITER $$
+CREATE PROCEDURE `FindElections` ()
+BEGIN
+	SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, "Popular" AS election_type FROM popular_elections
+	UNION ALL
+	SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Electoral' AS election_type FROM electoral_elections
+	UNION ALL
+	SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Referendum' AS election_type FROM referendums
+	UNION ALL
+	SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Initiative' AS election_type FROM initiatives
+	ORDER BY voting_deadline ASC;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- View `view1`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `view1`;
+DROP VIEW IF EXISTS `view1` ;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

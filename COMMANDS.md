@@ -31,5 +31,5 @@ author: Varun Narravula
     -   [ ] Initiative
     -   `election_type` :: `popular` | `electoral` | `referendum` | `initiative`
     -   `election_id` :: `number`
--   [ ] `/candidate-history` :: Find how many times each candidate has participated in elections (14)
--   [ ] `/party-popularities` :: Show popularity of political parties (15)
+-   [x] `/candidate-history` :: Find how many times each candidate has participated in elections (14)
+-   [x] `/party-popularities` :: Show popularity of political parties (15)

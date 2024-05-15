@@ -48,6 +48,10 @@ var (
 			Name:        "party-popularity",
 			Description: "Find the popularity of each political party by affiliation numbers",
 		},
+		{
+			Name:        "candidate-election-history",
+			Description: "Find the number of elections this candidate has ran in",
+		},
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App){
@@ -173,6 +177,47 @@ var (
 								{
 									Name:   "# Affiliated Citizens",
 									Value:  affiliationCounts,
+									Inline: true,
+								},
+							},
+						},
+					},
+				},
+			})
+		},
+
+		"candidate-election-history": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			candidates, err := a.CandidateElectionHistory()
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "Unable to retreive candidates list. Try again later.")
+				return
+			}
+
+			candidateNames := ""
+			electionCounts := ""
+
+			for _, v := range candidates {
+				candidateNames += fmt.Sprintf("%s\n", v.Name)
+				electionCounts += fmt.Sprintf("%v\n", v.NumberOfElections)
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Candidate Election History",
+							Description: "Number of Elections Candidates Participated In",
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "Name",
+									Value:  candidateNames,
+									Inline: true,
+								},
+								{
+									Name:   "# Elections",
+									Value:  electionCounts,
 									Inline: true,
 								},
 							},

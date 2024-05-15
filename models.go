@@ -23,3 +23,9 @@ type PartyPopularityResult struct {
 	Name             string
 	AffiliationCount int
 }
+
+type CandidateHistoryResult struct {
+	ID                int
+	Name              string
+	NumberOfElections int
+}

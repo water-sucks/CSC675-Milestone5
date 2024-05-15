@@ -103,3 +103,27 @@ func (a *App) PartyPopularity() ([]PartyPopularityResult, error) {
 
 	return parties, nil
 }
+
+func (a *App) CandidateElectionHistory() ([]CandidateHistoryResult, error) {
+	var candidates []CandidateHistoryResult
+
+	rows, err := a.db.Query("CALL CandidateHistory()")
+	if err != nil {
+		return nil, fmt.Errorf("CandidateElectionHistory: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var candidate CandidateHistoryResult
+		if err := rows.Scan(&candidate.ID, &candidate.Name, &candidate.NumberOfElections); err != nil {
+			return nil, fmt.Errorf("CandidateElectionHistory: %v", err)
+		}
+		candidates = append(candidates, candidate)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("CandidateElectionHistory: %v", err)
+	}
+
+	return candidates, nil
+}
