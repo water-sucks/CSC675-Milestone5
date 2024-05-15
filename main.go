@@ -31,7 +31,9 @@ func main() {
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+		commandName := i.ApplicationCommandData().Name
+		if h, ok := commandHandlers[commandName]; ok {
+			log.Printf("invoked slash command /%v", commandName)
 			h(s, i, &app)
 		}
 	})

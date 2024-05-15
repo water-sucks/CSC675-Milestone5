@@ -1,0 +1,10 @@
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (1, 1, 1);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (1, 1, 2);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (1, 1, 3);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (1, 1, 4);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (1, 1, 5);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 6);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 7);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 8);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 9);
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 10);

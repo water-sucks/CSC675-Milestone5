@@ -11,10 +11,11 @@ import (
 
 func InitDB() *sql.DB {
 	cfg := mysql.Config{
-		User:   os.Getenv("DB_USER"),
-		Passwd: os.Getenv("DB_PASSWORD"),
-		Addr:   os.Getenv("DB_HOST"),
-		DBName: os.Getenv("DB_NAME"),
+		User:      os.Getenv("DB_USER"),
+		Passwd:    os.Getenv("DB_PASSWORD"),
+		Addr:      os.Getenv("DB_HOST"),
+		DBName:    os.Getenv("DB_NAME"),
+		ParseTime: true,
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
@@ -28,7 +29,7 @@ func InitDB() *sql.DB {
 func (a *App) AllCitizens() ([]Citizen, error) {
 	var citizens []Citizen
 
-	rows, err := a.db.Query("SELECT * FROM citizens")
+	rows, err := a.db.Query("CALL GetCitizens()")
 	if err != nil {
 		return nil, fmt.Errorf("AllCitizens: %v", err)
 	}
@@ -46,5 +47,20 @@ func (a *App) AllCitizens() ([]Citizen, error) {
 		return nil, fmt.Errorf("AllCitizens: %v", err)
 	}
 
-	return []Citizen{}, nil
+	return citizens, nil
+}
+
+func (a *App) PopularElectionWinner(electionID int) (*PopularElectionWinner, error) {
+	var winner PopularElectionWinner
+
+	err := a.db.QueryRow("CALL PopularElectionWinner(?)", electionID).Scan(&winner.Name, &winner.Margin, &winner.NumberOfVotes)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, fmt.Errorf("PopularElectionWinner: %v", err)
+	default:
+		return &winner, nil
+	}
 }
