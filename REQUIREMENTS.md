@@ -17,7 +17,7 @@ author: Varun Narravula
 3. Implement a command that easily will find the most voted-for option of a
    referendum at a given time.
 4. Implement a command that easily will find if an initiative has been passed
-   (aka if the initiative has more yes than no options).
+   (aka if the initiative has enough yes votes to pass the threshold).
 5. Any action taken by an election administrator on the election votes tables
    will be recorded in the election audit log.
 6. Votes marked as suspicious for all election types can be removed at any time,

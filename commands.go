@@ -76,7 +76,21 @@ var (
 			} else if electionType == "referendum" {
 				sendMessage(s, i.Interaction, "Referendums not supported by this command currently.")
 			} else if electionType == "initiative" {
-				sendMessage(s, i.Interaction, "Initiatives not supported by this command currently.")
+				result, err := a.InitiativePassed(electionID)
+				if err != nil {
+					log.Printf(err.Error())
+					sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+				}
+				if result == nil {
+					sendMessage(s, i.Interaction, "An election with this ID does not exist.")
+					return
+				}
+
+				if result.Passed {
+					sendMessage(s, i.Interaction, fmt.Sprintf("The initiative '%v' has passed with %v votes.", result.Name, result.NumberOfVotes))
+				} else {
+					sendMessage(s, i.Interaction, fmt.Sprintf("The initiative '%v' currently has %v votes; it needs %v to pass.", result.Name, result.NumberOfVotes, result.RequiredNumberOfVotes))
+				}
 			} else {
 				sendMessage(s, i.Interaction, fmt.Sprintf("The specified election type %v is not supported.", electionType))
 			}

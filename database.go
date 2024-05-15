@@ -64,3 +64,18 @@ func (a *App) PopularElectionWinner(electionID int) (*PopularElectionWinner, err
 		return &winner, nil
 	}
 }
+
+func (a *App) InitiativePassed(electionID int) (*InitiativePassedResult, error) {
+	var result InitiativePassedResult
+
+	err := a.db.QueryRow("CALL InitiativePassed(?)", electionID).Scan(&result.Name, &result.Passed, &result.RequiredNumberOfVotes, &result.NumberOfVotes)
+	if err != nil {
+		return nil, fmt.Errorf("InitiativePassedResult: %v", err)
+	}
+
+	if result.RequiredNumberOfVotes == 0 {
+		return nil, nil
+	}
+
+	return &result, nil
+}

@@ -595,6 +595,7 @@ CREATE TABLE IF NOT EXISTS `initiatives` (
   `description` VARCHAR(200) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `voting_deadline` DATETIME NOT NULL,
+  `required_votes` INT NOT NULL,
   `category` INT NULL,
   PRIMARY KEY (`election_id`),
   INDEX `fk_initiatives_initiative_categories1_idx` (`category` ASC) VISIBLE,
@@ -692,6 +693,29 @@ BEGIN
   SELECT IF(margin_of_victory >= required_margin_of_victory, winner_id, NULL) INTO winner_id;
 
   SELECT name, first_place_vote_count, margin_of_victory FROM candidates WHERE candidate_id = winner_id;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure InitiativePassed
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `InitiativePassed`;
+
+DELIMITER $$
+CREATE PROCEDURE `InitiativePassed` (IN eid INT)
+BEGIN
+  DECLARE required INT DEFAULT 0;
+
+  SELECT required_votes INTO required FROM initiatives WHERE election_id = eid LIMIT 1;
+
+  SELECT
+    (SELECT name FROM initiatives WHERE election_id = eid LIMIT 1) AS name,
+    IF (COUNT(*) >= required AND COUNT(*) <> 0, TRUE, FALSE) AS passed,
+    required,
+    COUNT(*) AS vote_count
+  FROM initiative_votes
+  WHERE initiative_id = eid;
 END$$
 
 DELIMITER ;

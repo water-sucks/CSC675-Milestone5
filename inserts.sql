@@ -274,15 +274,20 @@ INSERT INTO initiative_categories (name, description) VALUES
   ("Education", "Initiatives related to education policies"),
   ("Healthcare", "Initiatives related to healthcare reforms"),
   ("Environment", "Initiatives related to environmental protection");
-INSERT INTO initiatives (name, description, voting_deadline, category) VALUES
-  ("Education Reform Act", "Proposal for comprehensive education reforms", TIMESTAMP("2020-11-03 23:59:59"), 1),
-  ("Healthcare Access Initiative", "Plan to improve access to healthcare for all citizens", TIMESTAMP("2020-11-03 23:59:59"), 2),
-  ("Green Energy Initiative", "Promotion of renewable energy adoption", TIMESTAMP("2020-11-03 23:59:59"), 3);
-INSERT INTO initiative_votes
-  (initiative_id, voter_id) VALUES
-  (1, 1),
-  (1, 2),
-  (1, 3);
+INSERT INTO initiatives (name, description, voting_deadline, required_votes, category) VALUES
+  ("Education Reform Act", "Proposal for comprehensive education reforms", TIMESTAMP("2020-11-03 23:59:59"), 5, 1),
+  ("Healthcare Access Initiative", "Plan to improve access to healthcare for all citizens", TIMESTAMP("2020-11-03 23:59:59"), 5, 2),
+  ("Green Energy Initiative", "Promotion of renewable energy adoption", TIMESTAMP("2020-11-03 23:59:59"), 5, 3);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 1);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 2);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 3);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 4);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 5);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 6);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 7);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 8);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 9);
+INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 10);
 
 -- Delete data so this script can be ran again for testing.
 -- This block also sets the autoincrement back to 1 for
