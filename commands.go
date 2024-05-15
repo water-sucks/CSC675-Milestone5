@@ -56,6 +56,24 @@ var (
 			Name:        "candidate-election-history",
 			Description: "Find the number of elections this candidate has ran in",
 		},
+		{
+			Name:        "find-election-turnout",
+			Description: "Find the total percentage of turnout of an election",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "election-type",
+					Description: "Type of election (popular | electoral | referendum | initiative)",
+					Required:    true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "election-id",
+					Description: "ID of election to find winner for",
+					Required:    true,
+				},
+			},
+		},
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App){
@@ -291,6 +309,60 @@ var (
 					},
 				},
 			})
+		},
+
+		"find-election-turnout": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			options := i.ApplicationCommandData().Options
+
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+			for _, opt := range options {
+				optionMap[opt.Name] = opt
+			}
+
+			electionID := int(optionMap["election-id"].IntValue())
+			electionType := optionMap["election-type"].StringValue()
+
+			var etype ElectionType
+			switch electionType {
+			case "popular":
+				etype = PopularElection
+			case "electoral":
+				etype = ElectoralElection
+			case "referendum":
+				etype = Referendum
+			case "initiative":
+				etype = Initiative
+			default:
+				{
+					sendMessage(s, i.Interaction, fmt.Sprintf("The specified election type %v is not supported.", electionType))
+					return
+				}
+			}
+
+			turnout, err := a.ElectionTurnout(electionID, etype)
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+				return
+			}
+			if turnout == nil {
+				sendMessage(s, i.Interaction, "An election with this ID does not exist.")
+				return
+			}
+
+			switch electionType {
+			case "popular":
+				sendMessage(s, i.Interaction, fmt.Sprintf("The turnout for this popular election '%v' was %v%% of registered voters.", turnout.Name, turnout.Turnout))
+			case "electoral":
+				sendMessage(s, i.Interaction, fmt.Sprintf("The turnout for this electoral election '%v' was %v%% of registered voters.", turnout.Name, turnout.Turnout))
+
+			case "referendum":
+				sendMessage(s, i.Interaction, fmt.Sprintf("The turnout for this referendum '%v' was %v%% of registered voters.", turnout.Name, turnout.Turnout))
+
+			case "initiative":
+				sendMessage(s, i.Interaction, fmt.Sprintf("The turnout for this initiative '%v' was %v%% of registered voters.", turnout.Name, turnout.Turnout))
+
+			}
 		},
 	}
 )

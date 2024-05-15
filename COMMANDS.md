@@ -24,11 +24,11 @@ author: Varun Narravula
 -   [ ] `/affiliation-map` :: find states' affiliations for a popular election (10)
     -   `election_id` :: `number`
 -   [x] `/list-elections` :: find available elections (12)
--   [ ] `/voter-turnout` :: find voter turnout for an election (13)
-    -   [ ] Popular
-    -   [ ] Electoral
-    -   [ ] Referendum
-    -   [ ] Initiative
+-   [x] `/voter-turnout` :: find voter turnout for an election (13)
+    -   [x] Popular
+    -   [x] Electoral
+    -   [x] Referendum
+    -   [x] Initiative
     -   `election_type` :: `popular` | `electoral` | `referendum` | `initiative`
     -   `election_id` :: `number`
 -   [x] `/candidate-history` :: Find how many times each candidate has participated in elections (14)

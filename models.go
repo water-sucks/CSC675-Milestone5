@@ -2,6 +2,15 @@ package main
 
 import "time"
 
+type ElectionType int
+
+const (
+	PopularElection = iota
+	ElectoralElection
+	Referendum
+	Initiative
+)
+
 type Patriot struct {
 	ID            int
 	Name          string
@@ -38,4 +47,9 @@ type ElectionHistoryResult struct {
 	Deadline       time.Time
 	DeadlinePassed bool
 	ElectionType   string
+}
+
+type ElectionTurnoutResult struct {
+	Name    string
+	Turnout float64
 }

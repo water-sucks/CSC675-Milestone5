@@ -151,3 +151,31 @@ func (a *App) ElectionHistory() ([]ElectionHistoryResult, error) {
 
 	return elections, nil
 }
+
+func (a *App) ElectionTurnout(electionID int, t ElectionType) (*ElectionTurnoutResult, error) {
+	var result ElectionTurnoutResult
+
+	var queryString string
+	switch t {
+	case PopularElection:
+		queryString = "CALL PopularElectionTurnout(?)"
+	case ElectoralElection:
+		queryString = "CALL ElectoralElectionTurnout(?)"
+	case Referendum:
+		queryString = "CALL ReferendumTurnout(?)"
+	case Initiative:
+		queryString = "CALL InitiativeTurnout(?)"
+	default:
+		log.Panicf("ElectionTurnout: incorrect value %v provided for election type", electionID)
+	}
+
+	err := a.db.QueryRow(queryString, electionID).Scan(&result.Name, &result.Turnout)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, fmt.Errorf("ElectionTurnout: %v", err)
+	default:
+		return &result, nil
+	}
+}

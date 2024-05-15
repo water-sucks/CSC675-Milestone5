@@ -2,20 +2,16 @@ USE VotingSystemsDB;
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS FindElections;
-CREATE PROCEDURE FindElections()
+DROP PROCEDURE IF EXISTS VoterTurnout;
+CREATE PROCEDURE VoterTurnout(IN eid INT)
 BEGIN
-  SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, "Popular" AS election_type FROM popular_elections
-  UNION ALL
-  SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Electoral' AS election_type FROM electoral_elections
-  UNION ALL
-  SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Referendum' AS election_type FROM referendums
-  UNION ALL
-  SELECT name, description, voting_deadline, CURRENT_TIMESTAMP < voting_deadline AS can_still_vote, 'Initiative' AS election_type FROM initiatives
-  ORDER BY voting_deadline ASC;
+  SELECT name, (
+    (SELECT COUNT(*) FROM initiative_votes WHERE election_id = eid) /
+    (SELECT COUNT(*) FROM citizens)
+  ) * 100 AS voter_turnout FROM initiatives WHERE election_id = eid LIMIT 1;
 END
 $$
 
 DELIMITER ;
 
-CALL FindElections;
+CALL VoterTurnout(10);

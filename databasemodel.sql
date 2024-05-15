@@ -797,14 +797,74 @@ END$$
 DELIMITER ;
 
 -- -----------------------------------------------------
+-- procedure PopularElectionTurnout
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `PopularElectionTurnout`;
+
+DELIMITER $$
+CREATE PROCEDURE `PopularElectionTurnout` (IN eid INT)
+BEGIN
+	SELECT name, (
+		(SELECT COUNT(*) FROM popular_election_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM citizens)
+	) * 100 AS voter_turnout FROM popular_elections WHERE election_id = eid LIMIT 1;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure ElectoralElectionTurnout
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `ElectoralElectionTurnout`;
+
+DELIMITER $$
+CREATE PROCEDURE `ElectoralElectionTurnout` (IN eid INT)
+BEGIN
+	SELECT name, (
+		(SELECT COUNT(*) FROM electoral_election_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM citizens)
+	) * 100 AS voter_turnout FROM electoral_elections WHERE election_id = eid LIMIT 1;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure ReferendumTurnout
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `ReferendumTurnout`;
+
+DELIMITER $$
+CREATE PROCEDURE `ReferendumTurnout` (IN eid INT)
+BEGIN
+	SELECT name, (
+		(SELECT COUNT(*) FROM referendum_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM citizens)
+	) * 100 AS voter_turnout FROM referendums WHERE election_id = eid LIMIT 1;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure InitiativeTurnout
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `InitiativeTurnout`;
+
+DELIMITER $$
+CREATE PROCEDURE `InitiativeTurnout` (IN eid INT)
+BEGIN
+	SELECT name, (
+		(SELECT COUNT(*) FROM initiative_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM citizens)
+	) * 100 AS voter_turnout FROM initiatives WHERE election_id = eid LIMIT 1;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
 -- View `view1`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `view1`;
 DROP VIEW IF EXISTS `view1` ;
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 DELIMITER $$
 
@@ -881,4 +941,8 @@ END$$
 
 
 DELIMITER ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
