@@ -49,6 +49,10 @@ var (
 			Description: "Find the popularity of each political party by affiliation numbers",
 		},
 		{
+			Name:        "find-elections",
+			Description: "List all elections and if they are available to vote in",
+		},
+		{
 			Name:        "candidate-election-history",
 			Description: "Find the number of elections this candidate has ran in",
 		},
@@ -177,6 +181,68 @@ var (
 								{
 									Name:   "# Affiliated Citizens",
 									Value:  affiliationCounts,
+									Inline: true,
+								},
+							},
+						},
+					},
+				},
+			})
+		},
+
+		"find-elections": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			elections, err := a.ElectionHistory()
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "Unable to retreive election list. Try again later.")
+				return
+			}
+
+			electionNames := ""
+			electionTypes := ""
+			descriptions := ""
+			deadlines := ""
+			deadlinePassed := ""
+
+			for _, v := range elections {
+				electionNames += fmt.Sprintf("%s\n", v.Name)
+				electionTypes += fmt.Sprintf("%s\n", v.ElectionType)
+				descriptions += fmt.Sprintf("%v\n", v.Description)
+				deadlines += fmt.Sprintf("%v\n", v.Deadline.Format("January 2, 2006"))
+				deadlinePassed += fmt.Sprintf("%v\n", v.DeadlinePassed)
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Candidate Election History",
+							Description: "Number of Elections Candidates Participated In",
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "Name",
+									Value:  electionNames,
+									Inline: true,
+								},
+								{
+									Name:   "Type",
+									Value:  electionTypes,
+									Inline: true,
+								},
+								{
+									Name:   "Description",
+									Value:  descriptions,
+									Inline: true,
+								},
+								{
+									Name:   "Voting Deadline",
+									Value:  deadlines,
+									Inline: true,
+								},
+								{
+									Name:   "Can You Vote?",
+									Value:  deadlinePassed,
 									Inline: true,
 								},
 							},

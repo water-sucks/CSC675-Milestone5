@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type Patriot struct {
 	ID            int
 	Name          string
@@ -28,4 +30,12 @@ type CandidateHistoryResult struct {
 	ID                int
 	Name              string
 	NumberOfElections int
+}
+
+type ElectionHistoryResult struct {
+	Name           string
+	Description    string
+	Deadline       time.Time
+	DeadlinePassed bool
+	ElectionType   string
 }

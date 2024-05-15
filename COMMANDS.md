@@ -23,7 +23,7 @@ author: Varun Narravula
     -   `citizen_id` :: `number`
 -   [ ] `/affiliation-map` :: find states' affiliations for a popular election (10)
     -   `election_id` :: `number`
--   [ ] `/list-elections` :: find available elections (12)
+-   [x] `/list-elections` :: find available elections (12)
 -   [ ] `/voter-turnout` :: find voter turnout for an election (13)
     -   [ ] Popular
     -   [ ] Electoral

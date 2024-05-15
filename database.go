@@ -127,3 +127,27 @@ func (a *App) CandidateElectionHistory() ([]CandidateHistoryResult, error) {
 
 	return candidates, nil
 }
+
+func (a *App) ElectionHistory() ([]ElectionHistoryResult, error) {
+	var elections []ElectionHistoryResult
+
+	rows, err := a.db.Query("CALL FindElections()")
+	if err != nil {
+		return nil, fmt.Errorf("ElectionHistory: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var election ElectionHistoryResult
+		if err := rows.Scan(&election.Name, &election.Description, &election.Deadline, &election.DeadlinePassed, &election.ElectionType); err != nil {
+			return nil, fmt.Errorf("ElectionHistory: %v", err)
+		}
+		elections = append(elections, election)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("ElectionHistory: %v", err)
+	}
+
+	return elections, nil
+}
