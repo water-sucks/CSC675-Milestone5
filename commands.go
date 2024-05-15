@@ -41,8 +41,8 @@ var (
 			},
 		},
 		{
-			Name:        "citizens",
-			Description: "List all citizens in this voting system",
+			Name:        "patriots",
+			Description: "List all citizens in this voting system that have 3 or more votes",
 		},
 	}
 
@@ -96,8 +96,8 @@ var (
 			}
 		},
 
-		"citizens": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
-			citizens, err := a.AllCitizens()
+		"patriots": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			citizens, err := a.Patriots()
 			if err != nil {
 				log.Printf(err.Error())
 				sendMessage(s, i.Interaction, "Unable to retreive citizens list. Try again later.")
@@ -105,9 +105,11 @@ var (
 			}
 
 			citizenNames := ""
+			citizenVotes := ""
 
 			for _, v := range citizens {
 				citizenNames += fmt.Sprintf("%s\n", v.Name)
+				citizenVotes += fmt.Sprintf("%v\n", v.NumberOfVotes)
 			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -115,12 +117,16 @@ var (
 				Data: &discordgo.InteractionResponseData{
 					Embeds: []*discordgo.MessageEmbed{
 						{
-							Title:       "Citizens",
-							Description: "List of citizens",
+							Title:       "Patriots",
+							Description: "Citizens with 3+ Votes",
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:  "Name",
 									Value: citizenNames,
+								},
+								{
+									Name:  "# Votes",
+									Value: citizenVotes,
 								},
 							},
 						},

@@ -1,13 +1,9 @@
 package main
 
-import "time"
-
-type Citizen struct {
-	ID      int
-	Name    string
-	SSN     string
-	DOB     time.Time
-	Address string
+type Patriot struct {
+	ID            int
+	Name          string
+	NumberOfVotes int
 }
 
 type PopularElectionWinner struct {

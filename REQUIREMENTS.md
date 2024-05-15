@@ -23,9 +23,9 @@ author: Varun Narravula
 6. Votes marked as suspicious for all election types can be removed at any time,
    and will not count towards victory for prior commands.
 7. Find all votes from a citizen for any given election type within a given time
-   frame; display votes marked as suspicious separately.
-8. Reject (fail) the deletion of an election administrator if there are no more
-   administrators with an "admin" role.
+   frame; display votes marked as suspicious with an indicator that it is marked
+   as suspicious.
+8. Show a list of "patriot" citizens that have voted more than 3 times.
 9. If a voter is deleted, then all votes for that user will be unlinked to them,
    but will still remain in the DB for archival purposes.
 10.   Implement a command that lists states and their affiliation leanings for a
@@ -33,7 +33,5 @@ author: Varun Narravula
 11.   Reject (fail) the insertion of votes after an election deadline.
 12.   Implement a command that list all elections that are possible to vote in.
 13.   Find the percentage of voter turnout for an election.
-14.   Find the most common referendum category voted for across all referendums
-      for a given timeframe.
-15.   Find the most common initiative category for an initiative voted for
-      across all initiatives for a given timeframe.
+14.   Find the number of times every candidate has participated in an election.
+15.   Find the number of citizens affiliated with each political party.

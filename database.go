@@ -26,25 +26,25 @@ func InitDB() *sql.DB {
 	return db
 }
 
-func (a *App) AllCitizens() ([]Citizen, error) {
-	var citizens []Citizen
+func (a *App) Patriots() ([]Patriot, error) {
+	var citizens []Patriot
 
-	rows, err := a.db.Query("CALL GetCitizens()")
+	rows, err := a.db.Query("CALL Patriots()")
 	if err != nil {
-		return nil, fmt.Errorf("AllCitizens: %v", err)
+		return nil, fmt.Errorf("Patriots: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var citizen Citizen
-		if err := rows.Scan(&citizen.ID, &citizen.Name, &citizen.SSN, &citizen.DOB, &citizen.Address); err != nil {
-			return nil, fmt.Errorf("AllCitizens: %v", err)
+		var citizen Patriot
+		if err := rows.Scan(&citizen.ID, &citizen.Name, &citizen.NumberOfVotes); err != nil {
+			return nil, fmt.Errorf("Patriots: %v", err)
 		}
 		citizens = append(citizens, citizen)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("AllCitizens: %v", err)
+		return nil, fmt.Errorf("Patriots: %v", err)
 	}
 
 	return citizens, nil

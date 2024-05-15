@@ -633,14 +633,26 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- procedure GetCitizens
+-- procedure Patriots
 -- -----------------------------------------------------
-DROP procedure IF EXISTS `GetCitizens`;
+DROP procedure IF EXISTS `Patriots`;
 
 DELIMITER $$
-CREATE PROCEDURE `GetCitizens` ()
+CREATE PROCEDURE `Patriots` ()
 BEGIN
-	SELECT citizen_id, name, ssn, dob, address FROM citizens;
+	SELECT 
+    citizen_id AS id,
+    (SELECT name FROM citizens WHERE citizen_id = id) AS name,
+    SUM(vote_count)
+  AS vote_count FROM (
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM popular_election_votes GROUP BY citizen_id
+    UNION ALL
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM electoral_election_votes GROUP BY citizen_id
+    UNION ALL
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM referendum_votes GROUP BY citizen_id
+    UNION ALL
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM initiative_votes GROUP BY citizen_id
+  ) votes GROUP BY id HAVING vote_count > 3;
 END$$
 
 DELIMITER ;
@@ -720,10 +732,6 @@ END$$
 
 DELIMITER ;
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
 DELIMITER $$
 
 DROP TRIGGER IF EXISTS `citizen_accounts_BEFORE_INSERT` $$
@@ -755,4 +763,8 @@ END$$
 
 
 DELIMITER ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
