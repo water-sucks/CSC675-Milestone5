@@ -732,6 +732,10 @@ END$$
 
 DELIMITER ;
 
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
 DELIMITER $$
 
 DROP TRIGGER IF EXISTS `citizen_accounts_BEFORE_INSERT` $$
@@ -765,8 +769,10 @@ END$$
 DROP TRIGGER IF EXISTS `popular_election_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`popular_election_votes_BEFORE_INSERT` BEFORE INSERT ON `popular_election_votes` FOR EACH ROW
 BEGIN
-	IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM popular_elections WHERE election_id = NEW.election_id LIMIT 1) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM popular_elections WHERE election_id = NEW.election_id LIMIT 1) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
+		END IF;
 	END IF;
 END$$
 
@@ -774,33 +780,35 @@ END$$
 DROP TRIGGER IF EXISTS `electoral_election_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`electoral_election_votes_BEFORE_INSERT` BEFORE INSERT ON `electoral_election_votes` FOR EACH ROW
 BEGIN
-	IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM electoral_elections WHERE election_id = NEW.election_id LIMIT 1) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
-	END IF;
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM electoral_elections WHERE election_id = NEW.election_id LIMIT 1) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
+		END IF;
+    END IF;
 END$$
 
 
 DROP TRIGGER IF EXISTS `referendum_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`referendum_votes_BEFORE_INSERT` BEFORE INSERT ON `referendum_votes` FOR EACH ROW
 BEGIN
-	IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM referendums WHERE election_id = NEW.referendum_id LIMIT 1) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
-	END IF;
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM referendums WHERE election_id = NEW.referendum_id LIMIT 1) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
+		END IF;
+    END IF;
 END$$
 
 
 DROP TRIGGER IF EXISTS `initiative_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`initiative_votes_BEFORE_INSERT` BEFORE INSERT ON `initiative_votes` FOR EACH ROW
 BEGIN
-	IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM initiatives WHERE election_id = NEW.initiative_id LIMIT 1) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
-	END IF;
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM initiatives WHERE election_id = NEW.initiative_id LIMIT 1) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
+		END IF;
+    END IF;
 END$$
 
 
 DELIMITER ;
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 

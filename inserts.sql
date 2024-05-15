@@ -3,6 +3,8 @@
 
 USE `VotingSystemsDB`;
 
+SET @DISABLE_TRIGGERS = 1;
+
 -- Create some cities.
 INSERT INTO cities
   (name, city_code, population) VALUES
@@ -288,6 +290,8 @@ INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 7);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 8);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 9);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 10);
+
+SET @DISABLE_TRIGGERS = NULL;
 
 -- Delete data so this script can be ran again for testing.
 -- This block also sets the autoincrement back to 1 for
