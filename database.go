@@ -79,3 +79,27 @@ func (a *App) InitiativePassed(electionID int) (*InitiativePassedResult, error) 
 
 	return &result, nil
 }
+
+func (a *App) PartyPopularity() ([]PartyPopularityResult, error) {
+	var parties []PartyPopularityResult
+
+	rows, err := a.db.Query("CALL PartyPopularity()")
+	if err != nil {
+		return nil, fmt.Errorf("PartyPopularity: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var party PartyPopularityResult
+		if err := rows.Scan(&party.AffiliationCount, &party.Name); err != nil {
+			return nil, fmt.Errorf("PartyPopularity: %v", err)
+		}
+		parties = append(parties, party)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("PartyPopularity: %v", err)
+	}
+
+	return parties, nil
+}

@@ -18,3 +18,8 @@ type InitiativePassedResult struct {
 	RequiredNumberOfVotes int
 	NumberOfVotes         int
 }
+
+type PartyPopularityResult struct {
+	Name             string
+	AffiliationCount int
+}

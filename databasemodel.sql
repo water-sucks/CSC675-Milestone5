@@ -732,6 +732,23 @@ END$$
 
 DELIMITER ;
 
+-- -----------------------------------------------------
+-- procedure PartyPopularity
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `PartyPopularity`;
+
+DELIMITER $$
+CREATE PROCEDURE `PartyPopularity` ()
+BEGIN
+	SELECT 
+		COUNT(*) AS affiliation_count, 
+		COALESCE((SELECT name FROM parties WHERE party_id = affiliation), "Independent") AS party_name
+	FROM citizens
+	GROUP BY affiliation;
+END$$
+
+DELIMITER ;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

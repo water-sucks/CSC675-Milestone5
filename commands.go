@@ -44,6 +44,10 @@ var (
 			Name:        "patriots",
 			Description: "List all citizens in this voting system that have 3 or more votes",
 		},
+		{
+			Name:        "party-popularity",
+			Description: "Find the popularity of each political party by affiliation numbers",
+		},
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App){
@@ -100,7 +104,7 @@ var (
 			citizens, err := a.Patriots()
 			if err != nil {
 				log.Printf(err.Error())
-				sendMessage(s, i.Interaction, "Unable to retreive citizens list. Try again later.")
+				sendMessage(s, i.Interaction, "Unable to retreive party popularity list. Try again later.")
 				return
 			}
 
@@ -121,12 +125,55 @@ var (
 							Description: "Citizens with 3+ Votes",
 							Fields: []*discordgo.MessageEmbedField{
 								{
-									Name:  "Name",
-									Value: citizenNames,
+									Name:   "Name",
+									Value:  citizenNames,
+									Inline: true,
 								},
 								{
-									Name:  "# Votes",
-									Value: citizenVotes,
+									Name:   "# Votes",
+									Value:  citizenVotes,
+									Inline: true,
+								},
+							},
+						},
+					},
+				},
+			})
+		},
+
+		"party-popularity": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			parties, err := a.PartyPopularity()
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "Unable to retreive political party list. Try again later.")
+				return
+			}
+
+			partyNames := ""
+			affiliationCounts := ""
+
+			for _, v := range parties {
+				partyNames += fmt.Sprintf("%s\n", v.Name)
+				affiliationCounts += fmt.Sprintf("%v\n", v.AffiliationCount)
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Party Popularity",
+							Description: "Affiliation Counts For Political Parties",
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "Name",
+									Value:  partyNames,
+									Inline: true,
+								},
+								{
+									Name:   "# Affiliated Citizens",
+									Value:  affiliationCounts,
+									Inline: true,
 								},
 							},
 						},
