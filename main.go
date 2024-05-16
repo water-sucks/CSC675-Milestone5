@@ -10,9 +10,12 @@ import (
 )
 
 func main() {
+	log.Println("starting up")
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("error loading .env: %v", err)
+		log.Printf("error loading .env: %v", err)
+		log.Println("environment variables may not be defined properly!")
 	}
 
 	token := os.Getenv("DISCORD_TOKEN")

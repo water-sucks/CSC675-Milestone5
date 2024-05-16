@@ -10,11 +10,28 @@ import (
 )
 
 func InitDB() *sql.DB {
+	user := os.Getenv("DB_USER")
+	if user == "" {
+		log.Fatalln("DB_USER is not defined")
+	}
+	password := os.Getenv("DB_PASSWORD")
+	if password == "" {
+		log.Fatalln("DB_PASSWORD is not defined")
+	}
+	address := os.Getenv("DB_HOST")
+	if address == "" {
+		log.Fatalln("DB_HOST is not defined")
+	}
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		log.Fatalln("DB_NAME is not defined")
+	}
+
 	cfg := mysql.Config{
-		User:      os.Getenv("DB_USER"),
-		Passwd:    os.Getenv("DB_PASSWORD"),
-		Addr:      os.Getenv("DB_HOST"),
-		DBName:    os.Getenv("DB_NAME"),
+		User:      user,
+		Passwd:    password,
+		Addr:      address,
+		DBName:    dbName,
 		ParseTime: true,
 	}
 
