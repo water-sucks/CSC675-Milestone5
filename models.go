@@ -59,3 +59,10 @@ type CitizenVoteResult struct {
 	CandidateName string
 	CastTime      time.Time
 }
+
+type ReferendumOptionResult struct {
+	ID             int
+	ReferendumName string
+	OptionName     string
+	Votes          int
+}

@@ -132,12 +132,57 @@ var (
 			} else if electionType == "electoral" {
 				sendMessage(s, i.Interaction, "Electoral elections not supported by this command currently.")
 			} else if electionType == "referendum" {
-				sendMessage(s, i.Interaction, "Referendums not supported by this command currently.")
+				results, err := a.ReferendumOptionsWithMostVotes(electionID)
+				if err != nil {
+					log.Printf(err.Error())
+					sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+					return
+				}
+				if len(results) == 0 {
+					sendMessage(s, i.Interaction, "There are no votes for this referendum yet!")
+				} else if len(results) == 1 {
+					o := results[0]
+					sendMessage(s, i.Interaction, fmt.Sprintf("The winning option for '%v' is '%v', with %v votes.", o.ReferendumName, o.OptionName, o.Votes))
+				} else {
+					optionNames := ""
+					voteCounts := ""
+
+					for _, v := range results {
+						optionNames += fmt.Sprintf("%s\n", v.OptionName)
+						voteCounts += fmt.Sprintf("%v\n", v.Votes)
+					}
+
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "There are ties between options! These are the options with ties:",
+							Embeds: []*discordgo.MessageEmbed{
+								{
+									Title:       "Current Winning Options",
+									Description: fmt.Sprintf("Options With Ties For Referendum '%v'", results[0].ReferendumName),
+									Fields: []*discordgo.MessageEmbedField{
+										{
+											Name:   "Option",
+											Value:  optionNames,
+											Inline: true,
+										},
+										{
+											Name:   "# Votes",
+											Value:  voteCounts,
+											Inline: true,
+										},
+									},
+								},
+							},
+						},
+					})
+				}
 			} else if electionType == "initiative" {
 				result, err := a.InitiativePassed(electionID)
 				if err != nil {
 					log.Printf(err.Error())
 					sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+					return
 				}
 				if result == nil {
 					sendMessage(s, i.Interaction, "An election with this ID does not exist.")

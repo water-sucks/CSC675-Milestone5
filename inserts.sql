@@ -273,14 +273,16 @@ INSERT INTO referendum_options
   (1, "Increase Funding", "Option to increase funding for education", 1),
   (1, "Don't Increase Funding", "Option to not increase funding for education", 2),
   (1, "Decrease Increase Funding", "Option to not increase funding for education", 3);
-INSERT INTO referendum_votes
-  (option_id, referendum_id, voter_id) VALUES
-  (1, 1, 1),
-  (2, 1, 2),
-  (3, 1, 3);
-INSERT INTO referendum_votes
-  (option_id, referendum_id, voter_id, status) VALUES
-  (3, 1, 4, "SUSPICIOUS");
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (1, 1, 1);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (1, 1, 2);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (1, 1, 3);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (1, 1, 9);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (2, 1, 4);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (2, 1, 5);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (2, 1, 6);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (3, 1, 7);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (3, 1, 8);
+INSERT INTO referendum_votes (option_id, referendum_id, voter_id) VALUES (3, 1, 10);
 
 -- Create some initiatives and seed one with some votes.
 INSERT INTO initiative_categories (name, description) VALUES

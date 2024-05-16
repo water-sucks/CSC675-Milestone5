@@ -908,14 +908,41 @@ END$$
 DELIMITER ;
 
 -- -----------------------------------------------------
--- procedure RemoveCitizen
+-- procedure ReferendumOptionResults
 -- -----------------------------------------------------
-DROP procedure IF EXISTS `RemoveCitizen`;
+DROP procedure IF EXISTS `ReferendumOptionResults`;
 
 DELIMITER $$
-CREATE PROCEDURE `RemoveCitizen` (IN cid INT)
+CREATE PROCEDURE `ReferendumOptionResults` (IN eid INT)
 BEGIN
-	DELETE FROM citizens WHERE citizen_id = cid;
+	DECLARE max_votes INT DEFAULT 0;
+
+  DROP TABLE IF EXISTS referendum_vote_counts;
+  CREATE TEMPORARY TABLE referendum_vote_counts (option_id INT, votes INT);
+  INSERT INTO referendum_vote_counts SELECT
+    option_id, COUNT(*) AS votes
+  FROM referendum_votes
+  WHERE
+    referendum_id = eid
+    AND status <> "SUSPICIOUS"
+  GROUP BY
+    option_id;
+
+  SELECT MAX(votes) AS votes INTO max_votes FROM referendum_vote_counts LIMIT 1;
+
+  SELECT
+    option_id AS oid,
+    (SELECT name FROM referendums WHERE election_id = eid LIMIT 1) AS referendum_name,
+    (
+      SELECT name FROM referendum_options
+      WHERE option_id = oid 
+      AND referendum_id = eid
+      LIMIT 1
+    ) AS option_name,
+    votes
+  FROM referendum_vote_counts
+  WHERE votes = max_votes
+  ORDER BY votes;
 END$$
 
 DELIMITER ;
@@ -925,6 +952,10 @@ DELIMITER ;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `view1`;
 DROP VIEW IF EXISTS `view1` ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 DELIMITER $$
 
@@ -1068,8 +1099,4 @@ END$$
 
 
 DELIMITER ;
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 

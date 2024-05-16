@@ -219,3 +219,27 @@ func (a *App) DeleteSuspiciousVotes() error {
 	}
 	return nil
 }
+
+func (a *App) ReferendumOptionsWithMostVotes(electionID int) ([]ReferendumOptionResult, error) {
+	var votes []ReferendumOptionResult
+
+	rows, err := a.db.Query("CALL ReferendumOptionResults(?)", electionID)
+	if err != nil {
+		return nil, fmt.Errorf("ReferendumOptionsWithMostVotes: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var result ReferendumOptionResult
+		if err := rows.Scan(&result.ID, &result.ReferendumName, &result.OptionName, &result.Votes); err != nil {
+			return nil, fmt.Errorf("ReferendumOptionsWithMostVotes: %v", err)
+		}
+		votes = append(votes, result)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("ReferendumOptionsWithMostVotes: %v", err)
+	}
+
+	return votes, nil
+}
