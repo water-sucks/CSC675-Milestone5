@@ -420,8 +420,8 @@ CREATE TABLE IF NOT EXISTS `electoral_election_candidates` (
   `notes` VARCHAR(45) NULL,
   `candidate_id` INT NOT NULL,
   `election_id` INT NOT NULL,
-  PRIMARY KEY (`candidate_id`, `election_id`),
   INDEX `fk_popular_election_candidates_copy1_electoral_elections1_idx` (`election_id` ASC) VISIBLE,
+  PRIMARY KEY (`candidate_id`, `election_id`),
   CONSTRAINT `fk_popular_election_candidates_candidates10`
     FOREIGN KEY (`candidate_id`)
     REFERENCES `candidates` (`candidate_id`)
@@ -446,12 +446,12 @@ CREATE TABLE IF NOT EXISTS `popular_election_votes` (
   `notes` VARCHAR(200) NULL,
   `candidate_id` INT NOT NULL,
   `election_id` INT NOT NULL,
-  `voter_id` INT NULL,
+  `voter_id` INT NOT NULL,
   INDEX `fk_popular_election_votes_citizens1_idx` (`voter_id` ASC) VISIBLE,
   CONSTRAINT `fk_popular_election_votes_citizens1`
     FOREIGN KEY (`voter_id`)
     REFERENCES `citizens` (`citizen_id`)
-    ON DELETE SET NULL
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_popular_election_votes_candidates1`
     FOREIGN KEY (`candidate_id`)
@@ -477,11 +477,11 @@ CREATE TABLE IF NOT EXISTS `electoral_election_votes` (
   `notes` VARCHAR(200) NULL,
   `candidate_id` INT NOT NULL,
   `election_id` INT NOT NULL,
-  `voter_id` INT NULL,
+  `voter_id` INT NOT NULL,
   CONSTRAINT `fk_electoral_election_votes_citizens1`
     FOREIGN KEY (`voter_id`)
     REFERENCES `citizens` (`citizen_id`)
-    ON DELETE SET NULL
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_electoral_election_votes_candidates1`
     FOREIGN KEY (`candidate_id`)
@@ -549,13 +549,12 @@ CREATE TABLE IF NOT EXISTS `referendum_votes` (
   `notes` VARCHAR(45) NULL,
   `option_id` INT NOT NULL,
   `referendum_id` INT NOT NULL,
-  `voter_id` INT NULL,
-  PRIMARY KEY (`option_id`, `referendum_id`),
+  `voter_id` INT NOT NULL,
   INDEX `fk_referendum_votes_referendums1_idx` (`referendum_id` ASC) VISIBLE,
   CONSTRAINT `fk_referendum_votes_citizens1`
     FOREIGN KEY (`voter_id`)
     REFERENCES `citizens` (`citizen_id`)
-    ON DELETE SET NULL
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_referendum_votes_referendum_options1`
     FOREIGN KEY (`option_id`)
@@ -617,7 +616,7 @@ CREATE TABLE IF NOT EXISTS `initiative_votes` (
   `status` VARCHAR(20) NOT NULL DEFAULT 'CAST',
   `notes` VARCHAR(200) NULL,
   `initiative_id` INT NOT NULL,
-  `voter_id` INT NULL,
+  `voter_id` INT NOT NULL,
   INDEX `fk_initiative_votes_citizens1_idx` (`voter_id` ASC) VISIBLE,
   CONSTRAINT `fk_initiative_votes_initiatives1`
     FOREIGN KEY (`initiative_id`)
@@ -627,7 +626,7 @@ CREATE TABLE IF NOT EXISTS `initiative_votes` (
   CONSTRAINT `fk_initiative_votes_citizens1`
     FOREIGN KEY (`voter_id`)
     REFERENCES `citizens` (`citizen_id`)
-    ON DELETE SET NULL
+    ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
@@ -650,13 +649,13 @@ BEGIN
     (SELECT name FROM citizens WHERE citizen_id = id) AS name,
     SUM(vote_count)
   AS vote_count FROM (
-    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM popular_election_votes GROUP BY citizen_id
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM popular_election_votes WHERE `status` <> "SUSPICIOUS" AND voter_id <> 69 GROUP BY citizen_id
     UNION ALL
-    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM electoral_election_votes GROUP BY citizen_id
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM electoral_election_votes WHERE `status` <> "SUSPICIOUS" AND voter_id <> 69 GROUP BY citizen_id
     UNION ALL
-    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM referendum_votes GROUP BY citizen_id
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM referendum_votes WHERE `status` <> "SUSPICIOUS" AND voter_id <> 69 GROUP BY citizen_id
     UNION ALL
-    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM initiative_votes GROUP BY citizen_id
+    SELECT voter_id AS citizen_id, COUNT(*) AS vote_count FROM initiative_votes WHERE `status` <> "SUSPICIOUS" AND voter_id <> 69 GROUP BY citizen_id
   ) votes GROUP BY id HAVING vote_count > 3;
 END$$
 
@@ -678,7 +677,7 @@ BEGIN
   DECLARE winner_id INT DEFAULT NULL;
 
   SELECT required_margin INTO required_margin_of_victory FROM popular_elections WHERE election_id = eid;
-  SELECT IF(COUNT(*) <> 0, COUNT(*), 1) INTO total_vote_count FROM popular_election_votes WHERE election_id = eid;
+  SELECT IF(COUNT(*) <> 0, COUNT(*), 1) INTO total_vote_count FROM popular_election_votes WHERE election_id = eid AND `status` <> "SUSPICIOUS";
 
   DROP TABLE IF EXISTS vote_counts;
   CREATE TEMPORARY TABLE vote_counts (candidate_id INT, votes INT);
@@ -694,12 +693,12 @@ BEGIN
         popular_election_votes
       WHERE
         election_id = eid
+        AND `status` <> "SUSPICIOUS"
       GROUP BY
         candidate_id
     ) vote_counts
   ORDER BY
     votes DESC;
-
 
   SELECT IFNULL(votes, 0) INTO first_place_vote_count FROM vote_counts LIMIT 0,1;
   SELECT IFNULL(votes, 0) INTO second_place_vote_count FROM vote_counts LIMIT 1,1;
@@ -732,7 +731,8 @@ BEGIN
     required,
     COUNT(*) AS vote_count
   FROM initiative_votes
-  WHERE initiative_id = eid;
+  WHERE initiative_id = eid
+  AND `status` <> "SUSPICIOUS";
 END$$
 
 DELIMITER ;
@@ -805,7 +805,7 @@ DELIMITER $$
 CREATE PROCEDURE `PopularElectionTurnout` (IN eid INT)
 BEGIN
 	SELECT name, (
-		(SELECT COUNT(*) FROM popular_election_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM popular_election_votes WHERE election_id = eid AND `status` <> "SUSPICIOUS" AND voter_id <> 69) /
 		(SELECT COUNT(*) FROM citizens)
 	) * 100 AS voter_turnout FROM popular_elections WHERE election_id = eid LIMIT 1;
 END$$
@@ -821,7 +821,7 @@ DELIMITER $$
 CREATE PROCEDURE `ElectoralElectionTurnout` (IN eid INT)
 BEGIN
 	SELECT name, (
-		(SELECT COUNT(*) FROM electoral_election_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM electoral_election_votes WHERE election_id = eid AND `status` <> "SUSPICIOUS" AND voter_id <> 69) /
 		(SELECT COUNT(*) FROM citizens)
 	) * 100 AS voter_turnout FROM electoral_elections WHERE election_id = eid LIMIT 1;
 END$$
@@ -837,7 +837,7 @@ DELIMITER $$
 CREATE PROCEDURE `ReferendumTurnout` (IN eid INT)
 BEGIN
 	SELECT name, (
-		(SELECT COUNT(*) FROM referendum_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM referendum_votes WHERE election_id = eid AND `status` <> "SUSPICIOUS" AND voter_id <> 69) /
 		(SELECT COUNT(*) FROM citizens)
 	) * 100 AS voter_turnout FROM referendums WHERE election_id = eid LIMIT 1;
 END$$
@@ -853,7 +853,7 @@ DELIMITER $$
 CREATE PROCEDURE `InitiativeTurnout` (IN eid INT)
 BEGIN
 	SELECT name, (
-		(SELECT COUNT(*) FROM initiative_votes WHERE election_id = eid) /
+		(SELECT COUNT(*) FROM initiative_votes WHERE election_id = eid AND `status` <> "SUSPICIOUS" AND voter_id <> 69) /
 		(SELECT COUNT(*) FROM citizens)
 	) * 100 AS voter_turnout FROM initiatives WHERE election_id = eid LIMIT 1;
 END$$
@@ -866,7 +866,7 @@ DELIMITER ;
 DROP procedure IF EXISTS `CitizenCandidateVotes`;
 
 DELIMITER $$
-CREATE PROCEDURE `CitizenCandidateVotes` ()
+CREATE PROCEDURE `CitizenCandidateVotes` (IN cid INT)
 BEGIN
 	SELECT election_name, candidate_name, created_at FROM (
 		SELECT
@@ -875,6 +875,7 @@ BEGIN
 			(SELECT name FROM candidates WHERE candidate_id = candidate_id LIMIT 1) AS candidate_name,
 			created_at
 		FROM popular_election_votes
+        WHERE `status` <> "SUSPICIOUS"
 		UNION ALL
 		SELECT
 			voter_id,
@@ -882,9 +883,39 @@ BEGIN
 			(SELECT name FROM candidates WHERE candidate_id = candidate_id LIMIT 1) AS candidate_name,
 			created_at AS cast_at
 		FROM electoral_election_votes
+        WHERE `status` <> "SUSPICIOUS"
 	) votes
 	WHERE voter_id = cid
 	ORDER BY created_at;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure RemoveSuspiciousVotes
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `RemoveSuspiciousVotes`;
+
+DELIMITER $$
+CREATE PROCEDURE `RemoveSuspiciousVotes` ()
+BEGIN
+	DELETE FROM popular_election_votes WHERE status = "SUSPICIOUS";
+	DELETE FROM electoral_election_votes WHERE status = "SUSPICIOUS";
+	DELETE FROM referendum_votes WHERE status = "SUSPICIOUS";
+	DELETE FROM initiative_votes WHERE status = "SUSPICIOUS";
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure RemoveCitizen
+-- -----------------------------------------------------
+DROP procedure IF EXISTS `RemoveCitizen`;
+
+DELIMITER $$
+CREATE PROCEDURE `RemoveCitizen` (IN cid INT)
+BEGIN
+	DELETE FROM citizens WHERE citizen_id = cid;
 END$$
 
 DELIMITER ;
@@ -896,6 +927,29 @@ DROP TABLE IF EXISTS `view1`;
 DROP VIEW IF EXISTS `view1` ;
 
 DELIMITER $$
+
+DROP TRIGGER IF EXISTS `citizens_BEFORE_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`citizens_BEFORE_DELETE` BEFORE DELETE ON `citizens` FOR EACH ROW
+BEGIN
+	IF OLD.citizen_id = 69 THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'citizen with ID 69 is a special entity and cannot be removed';
+	ELSE
+		UPDATE popular_election_votes SET voter_id = 69 WHERE voter_id = OLD.citizen_id;
+        UPDATE electoral_election_votes SET voter_id = 69 WHERE voter_id = OLD.citizen_id;
+        UPDATE referendum_votes SET voter_id = 69 WHERE voter_id = OLD.citizen_id;
+        UPDATE initiative_votes SET voter_id = 69 WHERE voter_id = OLD.citizen_id;
+	END IF;
+END$$
+
+
+DROP TRIGGER IF EXISTS `citizens_AFTER_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`citizens_AFTER_DELETE` AFTER DELETE ON `citizens` FOR EACH ROW
+BEGIN
+	INSERT INTO election_audit_log
+			(name, payload)
+            VALUES ("remove_citizen", CONCAT("{citizen_id: ", OLD.citizen_id, "}"));
+END$$
+
 
 DROP TRIGGER IF EXISTS `citizen_accounts_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`citizen_accounts_BEFORE_INSERT` BEFORE INSERT ON `citizen_accounts` FOR EACH ROW
@@ -936,6 +990,17 @@ BEGIN
 END$$
 
 
+DROP TRIGGER IF EXISTS `popular_election_votes_AFTER_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`popular_election_votes_AFTER_DELETE` AFTER DELETE ON `popular_election_votes` FOR EACH ROW
+BEGIN
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		INSERT INTO election_audit_log
+			(name, payload)
+            VALUES ("remove_vote", CONCAT("{voter_id: ", OLD.voter_id, ", election_type: popular, election_id:", OLD.election_id, "}"));
+    END IF;
+END$$
+
+
 DROP TRIGGER IF EXISTS `electoral_election_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`electoral_election_votes_BEFORE_INSERT` BEFORE INSERT ON `electoral_election_votes` FOR EACH ROW
 BEGIN
@@ -943,6 +1008,17 @@ BEGIN
 		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM electoral_elections WHERE election_id = NEW.election_id LIMIT 1) THEN
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
 		END IF;
+    END IF;
+END$$
+
+
+DROP TRIGGER IF EXISTS `electoral_election_votes_AFTER_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`electoral_election_votes_AFTER_DELETE` AFTER DELETE ON `electoral_election_votes` FOR EACH ROW
+BEGIN
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		INSERT INTO election_audit_log
+			(name, payload)
+            VALUES ("remove_vote", CONCAT("{voter_id: ", OLD.voter_id, ", election_type: electoral, election_id:", OLD.election_id, "}"));
     END IF;
 END$$
 
@@ -958,6 +1034,17 @@ BEGIN
 END$$
 
 
+DROP TRIGGER IF EXISTS `referendum_votes_AFTER_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`referendum_votes_AFTER_DELETE` AFTER DELETE ON `referendum_votes` FOR EACH ROW
+BEGIN
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		INSERT INTO election_audit_log
+			(name, payload)
+            VALUES ("remove_vote", CONCAT("{voter_id: ", OLD.voter_id, ", election_type: referendum, election_id:", OLD.referendum_id, "}"));
+    END IF;
+END$$
+
+
 DROP TRIGGER IF EXISTS `initiative_votes_BEFORE_INSERT` $$
 CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`initiative_votes_BEFORE_INSERT` BEFORE INSERT ON `initiative_votes` FOR EACH ROW
 BEGIN
@@ -965,6 +1052,17 @@ BEGIN
 		IF CURRENT_TIMESTAMP > (SELECT voting_deadline FROM initiatives WHERE election_id = NEW.initiative_id LIMIT 1) THEN
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'voting deadline has passed';
 		END IF;
+    END IF;
+END$$
+
+
+DROP TRIGGER IF EXISTS `initiative_votes_AFTER_DELETE` $$
+CREATE DEFINER = CURRENT_USER TRIGGER `VotingSystemsDB`.`initiative_votes_AFTER_DELETE` AFTER DELETE ON `initiative_votes` FOR EACH ROW
+BEGIN
+	IF (@DISABLE_TRIGGERS IS NULL) THEN
+		INSERT INTO election_audit_log
+			(name, payload)
+            VALUES ("remove_vote", CONCAT("{voter_id: ", OLD.voter_id, ", election_type: initiative, election_id:", OLD.initiative_id, "}"));
     END IF;
 END$$
 

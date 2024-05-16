@@ -53,7 +53,7 @@ func (a *App) Patriots() ([]Patriot, error) {
 func (a *App) PopularElectionWinner(electionID int) (*PopularElectionWinner, error) {
 	var winner PopularElectionWinner
 
-	err := a.db.QueryRow("CALL PopularElectionWinner(?)", electionID).Scan(&winner.Name, &winner.Margin, &winner.NumberOfVotes)
+	err := a.db.QueryRow("CALL PopularElectionWinner(?)", electionID).Scan(&winner.Name, &winner.NumberOfVotes, &winner.Margin)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -202,4 +202,20 @@ func (a *App) CitizenCandidateVotes(citizenID int) ([]CitizenVoteResult, error) 
 	}
 
 	return votes, nil
+}
+
+func (a *App) DeleteCitizen(citizenID int) error {
+	_, err := a.db.Query("Call RemoveCitizen(?)", citizenID)
+	if err != nil {
+		return fmt.Errorf("DeleteCitizen: %v", err)
+	}
+	return nil
+}
+
+func (a *App) DeleteSuspiciousVotes() error {
+	_, err := a.db.Query("CALL RemoveSuspiciousVotes()")
+	if err != nil {
+		return fmt.Errorf("DeleteSuspiciousVotes: %v", err)
+	}
+	return nil
 }

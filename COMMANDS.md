@@ -16,10 +16,10 @@ author: Varun Narravula
     -   [x] Initiative (4)
     -   `election_type` :: `popular` | `electoral` | `referendum` | `initiative`
     -   `election_id` :: `number`
--   [ ] `/remove-suspicious-votes` :: remove all suspicious votes at once (5, 6)
+-   [x] `/remove-suspicious-votes` :: remove all suspicious votes at once (5, 6)
 -   [x] `/citizen-votes` :: find all votes that citizen has cast (7)
 -   [x] `/patriots` :: list all citizens with more than 3 votes (8)
--   [ ] `/remove-citizen` :: remove votes for citizen (9)
+-   [x] `/remove-citizen` :: remove votes for citizen (9)
     -   `citizen_id` :: `number`
 -   [ ] `/affiliation-map` :: find states' affiliations for a popular election (10)
     -   `election_id` :: `number`

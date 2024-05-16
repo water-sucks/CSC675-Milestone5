@@ -1,9 +1,0 @@
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 1);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 2);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 3);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 4);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 5);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 6);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 7);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 8);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 9);

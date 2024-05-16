@@ -54,7 +54,7 @@ var (
 		},
 		{
 			Name:        "candidate-election-history",
-			Description: "Find the number of elections this candidate has ran in",
+			Description: "Find the number of elections all candidates have ran in",
 		},
 		{
 			Name:        "find-election-turnout",
@@ -85,6 +85,22 @@ var (
 					Required:    true,
 				},
 			},
+		},
+		{
+			Name:        "remove-citizen",
+			Description: "Remove a citizen from this voting system",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "citizen-id",
+					Description: "ID of citizen to remove",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name:        "remove-suspicious-votes",
+			Description: "Remove all suspicious votes at once",
 		},
 	}
 
@@ -432,6 +448,37 @@ var (
 					},
 				},
 			})
+		},
+
+		"remove-citizen": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			options := i.ApplicationCommandData().Options
+
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+			for _, opt := range options {
+				optionMap[opt.Name] = opt
+			}
+
+			citizenID := int(optionMap["citizen-id"].IntValue())
+
+			err := a.DeleteCitizen(citizenID)
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+				return
+			}
+
+			sendMessage(s, i.Interaction, "This citizen has been removed.")
+		},
+
+		"remove-suspicious-votes": func(s *discordgo.Session, i *discordgo.InteractionCreate, a *App) {
+			err := a.DeleteSuspiciousVotes()
+			if err != nil {
+				log.Printf(err.Error())
+				sendMessage(s, i.Interaction, "An internal error has occurred. Try again later.")
+				return
+			}
+
+			sendMessage(s, i.Interaction, "All suspicious votes have been removed from this system.")
 		},
 	}
 )

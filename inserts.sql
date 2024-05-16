@@ -159,6 +159,8 @@ INSERT INTO citizens
   ("David Wilson", "852369741", "1992-01-12", "505 Elmwood St", 2, 1, 1, 2, 2),
   ("Laura Martinez", "369147258", "1980-06-08", "606 Birch St", 3, 2, 1, 3, NULL),
   ("Christopher Taylor", "258369147", "1976-09-03", "707 Maplewood St", 1, 1, 1, 1, NULL);
+-- The citizen with ID 69 is a special citizen that represents deleted citizens.
+INSERT INTO citizens (citizen_id, name, ssn, dob, address) VALUES (69, "NULL ENTITY", "000000000", "1970-01-01", "");
 INSERT INTO citizen_accounts
   (citizen_id, email, password) VALUES
   (1, "johndoe@example.com", "$2a$10$d5Fq9SGfSud5KsM9RAVCQeYxrQSNNzi.7amuE9SpuKpKRg5bcVRpi"),
@@ -234,8 +236,11 @@ INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES 
 INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 6);
 INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 7);
 INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 8);
-INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 9); -- Create some electoral elections and seed one with some votes.
-INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 10);INSERT INTO electoral_elections
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id) VALUES (2, 1, 9); 
+INSERT INTO popular_election_votes (candidate_id, election_id, voter_id, status) VALUES (2, 1, 10, "SUSPICIOUS");
+
+-- Create some electoral elections and seed one with some votes.
+INSERT INTO electoral_elections
   (name, description, year, voting_deadline, required_votes_for_victory) VALUES
   ('2020 Presidential Election', '2020 Election for the President of the United States', DATE('2020-01-01'), TIMESTAMP('2020-11-03 23:59:59'), 270),
   ('2016 Presidential Election', '2020 Election for the President of the United States', DATE('2016-01-01'), TIMESTAMP('2020-11-08 23:59:59'), 270),
@@ -250,6 +255,9 @@ INSERT INTO electoral_election_votes
   (1, 1, 1) ,
   (2, 2, 2),
   (3, 3, 3);
+INSERT INTO electoral_election_votes
+  (candidate_id, election_id, voter_id, status) VALUES
+  (4, 1, 1, "SUSPICIOUS");
 
 -- Create some referendums and seed one with some votes.
 INSERT INTO referendums (name, description, year, voting_deadline) VALUES
@@ -270,6 +278,9 @@ INSERT INTO referendum_votes
   (1, 1, 1),
   (2, 1, 2),
   (3, 1, 3);
+INSERT INTO referendum_votes
+  (option_id, referendum_id, voter_id, status) VALUES
+  (3, 1, 4, "SUSPICIOUS");
 
 -- Create some initiatives and seed one with some votes.
 INSERT INTO initiative_categories (name, description) VALUES
@@ -289,7 +300,7 @@ INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 6);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 7);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 8);
 INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 9);
-INSERT INTO initiative_votes (initiative_id, voter_id) VALUES (1, 10);
+INSERT INTO initiative_votes (initiative_id, voter_id, status) VALUES (1, 10, "SUSPICIOUS");
 
 SET @DISABLE_TRIGGERS = NULL;
 
