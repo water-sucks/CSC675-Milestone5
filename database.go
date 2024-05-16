@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func InitDB() *sql.DB {
@@ -27,15 +27,18 @@ func InitDB() *sql.DB {
 		log.Fatalln("DB_NAME is not defined")
 	}
 
-	cfg := mysql.Config{
-		User:      user,
-		Passwd:    password,
-		Addr:      address,
-		DBName:    dbName,
-		ParseTime: true,
-	}
+	// This is not formatting the URL correctly
+	// when using FormatDSN, so I'm doing this myself.
+	// cfg := mysql.Config{
+	// 	User:      user,
+	// 	Passwd:    password,
+	// 	Addr:      address,
+	// 	DBName:    dbName,
+	// 	ParseTime: true,
+	// }
+	url := fmt.Sprintf("%v:%v@tcp(%v)/%v?parseTime=true", user, password, address, dbName)
 
-	db, err := sql.Open("mysql", cfg.FormatDSN())
+	db, err := sql.Open("mysql", url)
 	if err != nil {
 		log.Fatal("error opening database:", err)
 	}
